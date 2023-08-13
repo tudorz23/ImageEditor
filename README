@@ -1,0 +1,90 @@
+/* Copyright Marius-Tudor Zaharia 313CAa 2022-2023 */
+
+*General
+	In main am utilizat functia strtok pentru a determina comanda introdusa de
+utilizator. Am facut o copie a sirului de caractere citit pentru a avea la
+dispozitie in functii intregul string. In functii am facut mereu intai un
+strtok pentru a separa comanda efectiva de parametrii ei.
+
+*Comanda LOAD
+	Initial, deschid fisierul care contine imaginea in modul "r", pentru a de-
+termina magic word-ul. Apoi, il inchid si il redeschid in modul corect, in
+functie de tipul imaginii. In continuare, realizez citirea in modul specific
+fiecarui tip de fisier. Funcia "ignore_comments_and_empty_lines" este menita,
+asa cum sugereaza si numele, sa ignore liniilie din fisier care sunt comentate
+sau goale, dar si spatiile libere de la inceput sau final de linie.
+	Am stocat informatiile despre o imagine intr-o structura. Pentru imaginile
+grayscale, a fost suficienta o singura matrice pentru a salva valorile pixeli-
+lor. Pentru imaginile color, am ales sa folosesc 3 matrice, una pentru inten-
+sitatea de rosu (red), una pentru verde (green) si una pentru albastru (blue).
+Am considerat ca va fi mai usor de lucrat cu acest format decat daca foloseam
+o singura matrice si pentru RGB, care sa aiba cate 3 valori pentru fiecare
+pixel, adica, in total, 3 * numar de coloane. Variabila is_loaded din cadrul
+structurii imi permite sa aflu in orice moment daca in memorie exista sau nu o
+imagine incarcata, fiind utila pentru a sti daca mai este memorie de eliberat.
+De asemenea, inainte de a aloca memorie pentru o noua imagine, se verifica daca
+mai exista vreo imagine deja in memorie, caz in care se elibereaza intai acea
+imagine.
+
+*Comanda SELECT
+	Folosesc strtok pentru a imparti string-ul introdus de utilizator. Pe masu-
+ra ce obtin un nou token, verific daca acesta este NULL, caz in care nu este o
+comanda valida, sau daca nu este numar (pentru coordonate), cand, de asemenea,
+comanda este invalida. Folosesc atoi pentru a transforma sirul de caractere in
+int, iar daca rezultatul este 0, iar string-ul este diferit de caracterul '0',
+atunci sirul nu reprezinta un numar.
+
+*Comanda CROP
+	Utilizez matrice auxiliare pentru a salva, temporar, valorile din matricele
+structurii, pentru a putea elibera vechea matrice si a o realoca, cu noile di-
+mensiuni.
+
+*Comanda SAVE
+	Folosind strtok, aflu daca imaginea trebuie salvata in fisier binar sau
+ascii. La ambele formate, magic word-ul, dimensiunile si intensitatea maxima
+sunt scrise in format ascii, iar apoi este scrisa matricea, folosind functiile
+specifice formatului necesar.
+
+*Comanda HISTOGRAM
+	Determin numarul de elemente din fiecare bin. Folosesc un vector de frec-
+venta in care salvez direct suma frecventelor numerelor din fiecare bin (nu mai
+fac separat frecventele fiecarui numar).
+
+*Comanda EQUALIZE
+	De aceasta data, vectorul de frecventa salveaza aparitiile fiecarei valori.
+Pentru a nu face de fiecare data suma din formula a aparitiilor, am folosit
+alt vector, in care am salvat sumele partiale.
+
+*Comanda APPLY
+	In functie de parametrul introdus, am cate o functie care creeaza nucleul
+necesar. Folosind acel nucleu, aplic functia apply_kernel, care, utilizand
+matrice auxiliare, inlocuieste efectiv fiecare element din matrice cu noua sa
+valoare. Aceasta functie a fost gandita sa fie utilizabila pentru toate cele 4
+operatii din cadrul acestei comenzi, de aceea clampingul de la EDGE si SHARPEN
+se face in functiile asociate lor, dupa ce se incheie apelul functiei
+apply_kernel. In plus, operatiile matematice cu tipul double de la BLUR si
+GAUSSIAN_BLUR se fac in functiile asociate lor, pentru a nu strica functio-
+nalitatea generala a lui apply_kernel.
+
+*Comanda ROTATE
+	Determin daca este selectata toata imaginea, caz in care trebuie rotita in
+intregime. Altfel, vad daca selectia este de o matrice patratica, pentru a
+putea efectua operatia. Pentru rotirea unei imagini reprezentate printr-o
+matrice patratica, am functia cu caracter general rotate_square. Aceasta pri-
+meste ca parametru o "cheie", o valoare numerica reprezentand unghiul sub care
+trebuie rotita imaginea. Procesul este identic indiferent de unghi, caci nu
+este necesara o realocare de memorie. Se folosesc matrice auxiliare, apoi se
+trec valorile necesare inapoi in matricea originala, dupa anumite formule, in
+functie de unghi, formule pe care le-am gasit luand exemple pe hartie. Problema
+apare la rotirea integrala a unei imagini. La rotirea cu 180 de grade, nu este
+necesara o realocare de memorie, caci dimensiunile imaginii sunt exact ace-
+leasi. In schimb, la rotirea cu 90 sau 270 de grade, se modifica dimensiunile,
+astfel ca matricea originala trebuie eliberata si alocata din nou cu noile
+dimensiuni. De aceea, am facut o functie separata pentru rotirea cu 180, iar
+rotirile laterale le-am facut intr-o aceeasi functie, similar cu rotirea unei
+matrice patratice, caci dimensiunile dupa rotire vor fi aceleasi, indiferent
+daca imaginea se roteste cu 90 sau cu 270 de grade.
+
+*Comanda EXIT
+	Incheie programul, dar intai verifica daca mai este vreo imagine incarcata
+in memorie, iar daca este, ii elibereaza memoria.
